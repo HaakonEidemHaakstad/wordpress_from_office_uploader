@@ -194,9 +194,9 @@ Output will appear in `dist/main.exe`.
 
 1. Log into your WordPress admin panel.  
 
-2. Go to **Users → Profile → Application Passwords**.  
+2. Go to `Users → Profile → Application Passwords`.  
 
-3. Create a new application password (give it a name like \Uploader\).  
+3. Create a new application password (give it a name like **Uploader**).  
 
 4. In the app, enter:
 
