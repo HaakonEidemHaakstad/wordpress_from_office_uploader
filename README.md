@@ -239,8 +239,7 @@ If you need to revert, click **Undo / Regret**, and the app will re-upload the p
 
 
  🧰 Technical Overview
-
-
+```
 
 | Component            | Purpose                                        |
 
@@ -257,7 +256,7 @@ If you need to revert, click **Undo / Regret**, and the app will re-upload the p
 | chardet              | Auto-detects file encodings                    |
 
 | DPAPI (win32crypt)   | Optional encryption for stored credentials     |
-
+```
 
 
 **Workflow:**
