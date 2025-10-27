@@ -240,7 +240,7 @@ If you need to revert, click **Undo / Regret**, and the app will re-upload the p
 
 
 
-\ 🧰 Technical Overview
+🧰 Technical Overview
 
 
 
