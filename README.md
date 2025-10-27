@@ -6,7 +6,7 @@
 
 
 
-It converts `.docx` and `.xlsx` files into clean, self-contained HTML that preserves the original formatting, then uploads them to your WordPress site via the \*\*REST API\*\*.  
+It converts `.docx` and `.xlsx` files into clean, self-contained HTML that preserves the original formatting, then uploads them to your WordPress site via the **REST API**.  
 
 
 
