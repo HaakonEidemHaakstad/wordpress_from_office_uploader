@@ -38,11 +38,11 @@ Uses Microsoft Word and Excel (via COM automation) to export documents as HTML w
 
 A built-in BeautifulSoup/LXML cleaner:
 
-\- Removes unnecessary Microsoft Office markup.  
+- Removes unnecessary Microsoft Office markup.  
 
-\- Inlines all CSS and images as `data:` URIs.  
+- Inlines all CSS and images as `data:` URIs.  
 
-\- Produces WordPress-compatible HTML that looks exactly like your original document.
+- Produces WordPress-compatible HTML that looks exactly like your original document.
 
 
 
@@ -50,7 +50,7 @@ A built-in BeautifulSoup/LXML cleaner:
 
 Before each upload, the program automatically downloads and backs up the current page’s HTML.  
 
-If you upload to the wrong page or don’t like the result, click \*\*Undo / Regret\*\* to instantly restore the previous version.
+If you upload to the wrong page or don’t like the result, click **Undo / Regret** to instantly restore the previous version.
 
 
 
