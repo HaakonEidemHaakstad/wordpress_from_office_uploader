@@ -1,8 +1,8 @@
-\# 🧭 WordPress Uploader v1.0
+# 🧭 WordPress Uploader v1.0
 
 
 
-\*\*WordPress Uploader\*\* is a lightweight, open-source desktop app built with \*\*Python\*\* and \*\*PySide6\*\* that lets you update WordPress pages directly from \*\*Word\*\*, \*\*Excel\*\*, or \*\*HTML\*\* files — without manually cleaning or pasting code.  
+**WordPress Uploader** is a lightweight, open-source desktop app built with **Python** and **PySide6** that lets you update WordPress pages directly from **Word**, **Excel**, or **HTML** files — without manually cleaning or pasting code.  
 
 
 
