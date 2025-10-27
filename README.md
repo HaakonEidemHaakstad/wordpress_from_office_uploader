@@ -18,23 +18,23 @@ Perfect for teams or individuals who regularly update content such as tables, ne
 
 
 
-\## ✨ Features
+## ✨ Features
 
 
 
-✅ \*\*Drag-and-Drop Uploads\*\*  
+✅ **Drag-and-Drop Uploads**  
 
 Drop a `.docx`, `.xlsx`, or `.html` file straight into the window — no file dialog required.
 
 
 
-✅ \*\*Accurate Office Conversion\*\*  
+✅ **Accurate Office Conversion**  
 
 Uses Microsoft Word and Excel (via COM automation) to export documents as HTML while keeping fonts, colors, borders, alignment, and spacing intact.
 
 
 
-✅ \*\*Smart HTML Cleaning\*\*  
+✅ **Smart HTML Cleaning**  
 
 A built-in BeautifulSoup/LXML cleaner:
 
@@ -46,7 +46,7 @@ A built-in BeautifulSoup/LXML cleaner:
 
 
 
-✅ \*\*Safe Uploading with Undo / Regret\*\*  
+✅ **Safe Uploading with Undo / Regret**  
 
 Before each upload, the program automatically downloads and backs up the current page’s HTML.  
 
@@ -54,21 +54,21 @@ If you upload to the wrong page or don’t like the result, click \*\*Undo / Reg
 
 
 
-✅ \*\*Credential Auto-Fill\*\*  
+✅ **Credential Auto-Fill**  
 
 Optionally save credentials to `defaults.txt` (password encrypted using Windows DPAPI when available).
 
 
 
-✅ \*\*Progress Feedback\*\*  
+✅ **Progress Feedback**  
 
 A progress bar and status log show every step of the process — conversion, cleaning, upload.
 
 
 
-✅ \*\*Cross-Version Compatible\*\*  
+✅ **Cross-Version Compatible**  
 
-Runs on \*\*Python 3.10–3.14\*\* with \*\*Windows + Microsoft Office\*\* installed.
+Runs on **Python 3.10–3.14** with **Windows + Microsoft Office** installed.
 
 
 
@@ -76,15 +76,15 @@ Runs on \*\*Python 3.10–3.14\*\* with \*\*Windows + Microsoft Office\*\* insta
 
 
 
-\## 🧩 Requirements
+## 🧩 Requirements
 
 
 
-\- \*\*Windows 10/11\*\*
+- **Windows 10/11**
 
-\- \*\*Microsoft Office\*\* (Word + Excel)
+- **Microsoft Office** (Word + Excel)
 
-\- \*\*Python 3.10–3.14\*\*
+- **Python 3.10–3.14**
 
 
 
@@ -100,7 +100,7 @@ pip install -r requirements.txt
 
 
 
-\*\*requirements.txt\*\*
+**requirements.txt**
 
 ```
 
@@ -124,63 +124,63 @@ chardet
 
 
 
-\## ⚙️ Setup \& Usage
+ ⚙️ Setup \& Usage
 
 
 
-1\. \*\*Clone or download\*\* this repository:
+1\. **Clone or download** this repository:
 
-&nbsp;  ```bash
+```bash
 
-&nbsp;  git clone https://github.com/<your-username>/wordpress-uploader.git
+git clone https://github.com/<your-username>/wordpress-uploader.git
 
-&nbsp;  cd wordpress-uploader
+cd wordpress-uploader
 
-&nbsp;  ```
-
-
-
-2\. \*\*Create and activate a virtual environment (optional)\*\*
-
-&nbsp;  ```bash
-
-&nbsp;  python -m venv venv
-
-&nbsp;  venv\\Scripts\\activate
-
-&nbsp;  ```
+```
 
 
 
-3\. \*\*Install dependencies\*\*
+2\. **Create and activate a virtual environment (optional)**
 
-&nbsp;  ```bash
+```bash
 
-&nbsp;  pip install -r requirements.txt
+python -m venv venv
 
-&nbsp;  ```
+venv\\Scripts\\activate
 
-
-
-4\. \*\*Run the application\*\*
-
-&nbsp;  ```bash
-
-&nbsp;  python main.py
-
-&nbsp;  ```
+```
 
 
 
-5\. \*\*(Optional)\*\* Build a standalone executable:
+3\. **Install dependencies**
 
-&nbsp;  ```bash
+```bash
 
-&nbsp;  pyinstaller --onefile --windowed main.py
+pip install -r requirements.txt
 
-&nbsp;  ```
+```
 
-&nbsp;  Output will appear in `dist/main.exe`.
+
+
+4\. \\Run the application\\
+
+```bash
+
+python main.py
+
+```
+
+
+
+5\. **(Optional)** Build a standalone executable:
+
+```bash
+
+pyinstaller --onefile --windowed main.py
+
+ ```
+
+Output will appear in `dist/main.exe`.
 
 
 
@@ -188,27 +188,27 @@ chardet
 
 
 
-\## 🔑 Connecting to WordPress
+## 🔑 Connecting to WordPress
 
 
 
 1\. Log into your WordPress admin panel.  
 
-2\. Go to \*\*Users → Profile → Application Passwords\*\*.  
+2\. Go to \\Users → Profile → Application Passwords\\.  
 
-3\. Create a new application password (give it a name like \*Uploader\*).  
+3\. Create a new application password (give it a name like \Uploader\).  
 
 4\. In the app, enter:
 
-&nbsp;  - \*\*Site URL\*\* — e.g. `https://example.com`
+- **Site URL** — e.g. `https://example.com`
 
-&nbsp;  - \*\*Username\*\* — your WordPress username
+- **Username** — your WordPress username
 
-&nbsp;  - \*\*Application Password\*\*
+- **Application Password**
 
-5\. Click \*\*Log In\*\* → the dropdown will populate with all editable pages.
+5\. Click **Log In** → the dropdown will populate with all editable pages.
 
-6\. Drag your file into the window, check “I have selected the correct page,” and click \*\*Update\*\*.
+6\. Drag your file into the window, check “I have selected the correct page,” and click **Update**.
 
 
 
@@ -216,7 +216,7 @@ chardet
 
 
 
-\## 🩹 Undo / Regret
+## 🩹 Undo / Regret
 
 
 
@@ -232,7 +232,7 @@ temp\_backup.html
 
 
 
-If you need to revert, click \*\*Undo / Regret\*\*, and the app will re-upload the previous version to WordPress.
+If you need to revert, click **Undo / Regret**, and the app will re-upload the previous version to WordPress.
 
 
 
@@ -240,7 +240,7 @@ If you need to revert, click \*\*Undo / Regret\*\*, and the app will re-upload t
 
 
 
-\## 🧰 Technical Overview
+\ 🧰 Technical Overview
 
 
 
@@ -248,21 +248,21 @@ If you need to revert, click \*\*Undo / Regret\*\*, and the app will re-upload t
 
 |------------|----------|
 
-| \*\*PySide6\*\* | GUI framework (Qt for Python) |
+| **PySide6** | GUI framework (Qt for Python) |
 
-| \*\*pywin32\*\* | Accesses Word/Excel via COM for conversion |
+| **pywin32** | Accesses Word/Excel via COM for conversion |
 
-| \*\*BeautifulSoup + lxml\*\* | Cleans and normalizes exported HTML |
+| **BeautifulSoup + lxml** | Cleans and normalizes exported HTML |
 
-| \*\*requests\*\* | Uploads content through the WordPress REST API |
+| **requests** | Uploads content through the WordPress REST API |
 
-| \*\*chardet\*\* | Auto-detects file encodings |
+| **chardet** | Auto-detects file encodings |
 
-| \*\*DPAPI (win32crypt)\*\* | Optional encryption for stored credentials |
+| **DPAPI (win32crypt)** | Optional encryption for stored credentials |
 
 
 
-\*\*Workflow:\*\*
+**Workflow:**
 
 ```
 
@@ -276,7 +276,7 @@ Drag \& Drop → Office COM export → HTML Cleaning → Inline assets → Uploa
 
 
 
-\## 📂 Project Structure
+## 📂 Project Structure
 
 
 
@@ -308,7 +308,7 @@ wordpress-uploader/
 
 
 
-\## 🏷 Version History
+## 🏷 Version History
 
 
 
@@ -316,7 +316,7 @@ wordpress-uploader/
 
 |----------|------|-------------|
 
-| \*\*1.0\*\* | 2025-10-27 | Initial public release — full Word/Excel support, Undo/Regret, PySide6 GUI |
+| **1.0.0** | 2025-10-27 | Initial public release — full Word/Excel support, Undo/Regret, PySide6 GUI |
 
 
 
@@ -324,27 +324,13 @@ wordpress-uploader/
 
 
 
-\## 💡 Example Use Case
+## 💡 Example Use Case
 
 
 
-You maintain weekly schedules or reports in Word or Excel and want to publish them directly to your WordPress site without losing layout or manually cleaning HTML.  
+Non-tech savvy individuals that know how to create Microsoft Word or Excel can easily produce websites hosted using WordPress by simply producing the web pages using Word or Excel and uploading them to WordPress, without having to navigate the WordPress user interface.
 
-With this tool, you simply drag in the file, pick the page, and click \*\*Update\*\* — done.
-
-
-
----
-
-
-
-\## 🧑‍💻 Author
-
-
-
-\*\*Haakon Eidem Haakstad\*\*  
-
-\[GitHub](https://github.com/<your-username>) • \[fontenehusetasker.no](https://www.fontenehusetasker.no)
+With this tool, you simply drag in the Word or Excel file, pick the page to update, and click **Update** — done.
 
 
 
@@ -352,11 +338,25 @@ With this tool, you simply drag in the file, pick the page, and click \*\*Update
 
 
 
-\## 🪪 License
+## 🧑‍💻 Author
 
 
 
-This project is licensed under the \*\*MIT License\*\* — see the \[LICENSE](LICENSE) file for details.
+**Haakon Eidem Haakstad**  
+
+[GitHub](https://github.com/<your-username>)
+
+
+
+---
+
+
+
+## 🪪 License
+
+
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 
 
@@ -384,17 +384,17 @@ in the Software without restriction...
 
 
 
-\## 🙏 Acknowledgments
+## 🙏 Acknowledgments
 
 
 
-\- Built with \*\*Qt for Python (PySide6)\*\*.  
+- Built with **Qt for Python (PySide6)**.  
 
-\- Uses \*\*BeautifulSoup\*\*, \*\*lxml\*\*, and \*\*pywin32\*\*.  
+- Uses **BeautifulSoup**, **lxml**, and **pywin32**.  
 
-\- Inspired by real needs at Fontenehuset Asker for efficient content publishing.  
+- Inspired by real needs at Fontenehuset Asker for efficient content publishing.  
 
-\- Open-sourced to help others simplify the same workflow.
+- Open-sourced to help others simplify the same workflow.
 
 
 
