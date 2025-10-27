@@ -1,2 +1,43 @@
-dist
-build
+# --- Python build artifacts ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# --- PyInstaller output ---
+build/
+dist/
+*.spec
+
+# --- Virtual environments ---
+venv/
+env/
+.venv/
+venv*/   # catch variations like venv313, venv314, etc.
+
+# --- Temporary and backup files ---
+_tmp_export/
+temp_backup.html
+*.tmp
+*.bak
+~$*
+
+# --- Local config or credentials ---
+defaults.txt
+config.json
+credentials.json
+*.ini
+*.key
+
+# --- Logs ---
+*.log
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+
+# --- IDE / Editor settings ---
+.vscode/
+.idea/
+*.code-workspace
