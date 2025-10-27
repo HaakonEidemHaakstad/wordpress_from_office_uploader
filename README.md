@@ -305,14 +305,13 @@ wordpress-uploader/
 ## 🏷 Version History
 
 
+```
+| Version   | Date        | Highlights                                                                |
 
-| Version | Date | Highlights |
-
-|----------|------|-------------|
+|-----------|------------|----------------------------------------------------------------------------|
 
 | **1.0.0** | 2025-10-27 | Initial public release — full Word/Excel support, Undo/Regret, PySide6 GUI |
-
-
+```
 
 ---
 
