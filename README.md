@@ -124,7 +124,7 @@ chardet
 
 
 
- ⚙️ Setup \& Usage
+ ⚙️ Setup & Usage
 
 
 
@@ -172,7 +172,7 @@ python main.py
 
 
 
-5\. **(Optional)** Build a standalone executable:
+5. **(Optional)** Build a standalone executable:
 
 ```bash
 
@@ -181,8 +181,6 @@ pyinstaller --onefile --windowed main.py
  ```
 
 Output will appear in `dist/main.exe`.
-
-
 
 ---
 
@@ -240,25 +238,25 @@ If you need to revert, click **Undo / Regret**, and the app will re-upload the p
 
 
 
-🧰 Technical Overview
+ 🧰 Technical Overview
 
 
 
-| Component | Purpose |
+| Component            | Purpose                                        |
 
-|------------|----------|
+|----------------------|------------------------------------------------|
 
-| **PySide6** | GUI framework (Qt for Python) |
+| PySide6              | GUI framework (Qt for Python)                  |
 
-| **pywin32** | Accesses Word/Excel via COM for conversion |
+| pywin32              | Accesses Word/Excel via COM for conversion     |
 
-| **BeautifulSoup + lxml** | Cleans and normalizes exported HTML |
+| BeautifulSoup + lxml | Cleans and normalizes exported HTML            |
 
-| **requests** | Uploads content through the WordPress REST API |
+| requests             | Uploads content through the WordPress REST API |
 
-| **chardet** | Auto-detects file encodings |
+| chardet              | Auto-detects file encodings                    |
 
-| **DPAPI (win32crypt)** | Optional encryption for stored credentials |
+| DPAPI (win32crypt)   | Optional encryption for stored credentials     |
 
 
 
@@ -266,7 +264,7 @@ If you need to revert, click **Undo / Regret**, and the app will re-upload the p
 
 ```
 
-Drag \& Drop → Office COM export → HTML Cleaning → Inline assets → Upload → Undo backup
+Drag & Drop → Office COM export → HTML Cleaning → Inline assets → Upload → Undo backup
 
 ```
 
