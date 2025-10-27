@@ -306,7 +306,7 @@ wordpress-uploader/
 
 
 ```
-| Version   | Date        | Highlights                                                                |
+| Version   | Date       | Highlights                                                                 |
 
 |-----------|------------|----------------------------------------------------------------------------|
 
