@@ -1,38 +1,22 @@
 # 🧭 WordPress Uploader v1.0
 
-
-
 **WordPress Uploader** is a lightweight, open-source desktop app built with **Python** and **PySide6** that lets you update WordPress pages directly from **Word**, **Excel**, or **HTML** files — without manually cleaning or pasting code.  
-
-
 
 It converts `.docx` and `.xlsx` files into clean, self-contained HTML that preserves the original formatting, then uploads them to your WordPress site via the **REST API**.  
 
-
-
 Perfect for teams or individuals who regularly update content such as tables, newsletters, or schedules from Office documents.
-
-
 
 ---
 
-
-
 ## ✨ Features
-
-
 
 ✅ **Drag-and-Drop Uploads**  
 
 Drop a `.docx`, `.xlsx`, or `.html` file straight into the window — no file dialog required.
 
-
-
 ✅ **Accurate Office Conversion**  
 
 Uses Microsoft Word and Excel (via COM automation) to export documents as HTML while keeping fonts, colors, borders, alignment, and spacing intact.
-
-
 
 ✅ **Smart HTML Cleaning**  
 
@@ -45,7 +29,6 @@ A built-in BeautifulSoup/LXML cleaner:
 - Produces WordPress-compatible HTML that looks exactly like your original document.
 
 
-
 ✅ **Safe Uploading with Undo / Regret**  
 
 Before each upload, the program automatically downloads and backs up the current page’s HTML.  
@@ -53,11 +36,9 @@ Before each upload, the program automatically downloads and backs up the current
 If you upload to the wrong page or don’t like the result, click **Undo / Regret** to instantly restore the previous version.
 
 
-
 ✅ **Credential Auto-Fill**  
 
 Optionally save credentials to `defaults.txt` (password encrypted using Windows DPAPI when available).
-
 
 
 ✅ **Progress Feedback**  
@@ -65,20 +46,13 @@ Optionally save credentials to `defaults.txt` (password encrypted using Windows 
 A progress bar and status log show every step of the process — conversion, cleaning, upload.
 
 
-
 ✅ **Cross-Version Compatible**  
 
 Runs on **Python 3.10–3.14** with **Windows + Microsoft Office** installed.
 
-
-
 ---
 
-
-
 ## 🧩 Requirements
-
-
 
 - **Windows 10/11**
 
@@ -86,19 +60,13 @@ Runs on **Python 3.10–3.14** with **Windows + Microsoft Office** installed.
 
 - **Python 3.10–3.14**
 
-
-
 Install dependencies:
-
-
 
 ```bash
 
 pip install -r requirements.txt
 
 ```
-
-
 
 **requirements.txt**
 
@@ -118,15 +86,9 @@ chardet
 
 ```
 
-
-
 ---
 
-
-
  ⚙️ Setup & Usage
-
-
 
 1. **Clone or download** this repository:
 
@@ -138,8 +100,6 @@ cd wordpress-uploader
 
 ```
 
-
-
 2. **Create and activate a virtual environment (optional)**
 
 ```bash
@@ -150,8 +110,6 @@ venv\\Scripts\\activate
 
 ```
 
-
-
 3. **Install dependencies**
 
 ```bash
@@ -160,8 +118,6 @@ pip install -r requirements.txt
 
 ```
 
-
-
 4. **Run the application**
 
 ```bash
@@ -169,8 +125,6 @@ pip install -r requirements.txt
 python main.py
 
 ```
-
-
 
 5. **(Optional)** Build a standalone executable:
 
@@ -184,11 +138,7 @@ Output will appear in `dist/main.exe`.
 
 ---
 
-
-
 ## 🔑 Connecting to WordPress
-
-
 
 1. Log into your WordPress admin panel.  
 
@@ -208,19 +158,13 @@ Output will appear in `dist/main.exe`.
 
 6. Drag your file into the window, check “I have selected the correct page,” and click **Update**.
 
-
-
 ---
 
 
 
 ## 🩹 Undo / Regret
 
-
-
 Each upload automatically saves the previous page content to a local file:
-
-
 
 ```
 
@@ -228,15 +172,9 @@ temp\_backup.html
 
 ```
 
-
-
 If you need to revert, click **Undo / Regret**, and the app will re-upload the previous version to WordPress.
 
-
-
 ---
-
-
 
  🧰 Technical Overview
 ```
@@ -258,7 +196,6 @@ If you need to revert, click **Undo / Regret**, and the app will re-upload the p
 | DPAPI (win32crypt)   | Optional encryption for stored credentials     |
 ```
 
-
 **Workflow:**
 
 ```
@@ -267,15 +204,9 @@ Drag & Drop → Office COM export → HTML Cleaning → Inline assets → Upload
 
 ```
 
-
-
 ---
 
-
-
 ## 📂 Project Structure
-
-
 
 ```
 
@@ -293,11 +224,7 @@ wordpress-uploader/
 
 ```
 
-
-
 ---
-
-
 
 ## 🏷 Version History
 
@@ -312,46 +239,28 @@ wordpress-uploader/
 
 ---
 
-
-
 ## 💡 Example Use Case
 
-
-
-Non-tech savvy individuals that know how to create Microsoft Word or Excel can easily produce websites hosted using WordPress by simply producing the web pages using Word or Excel and uploading them to WordPress, without having to navigate the WordPress user interface.
+This tool enables non-technical users to generate and update WordPress pages directly from Microsoft Word or Excel files, eliminating the need to interact with the WordPress UI.
 
 With this tool, you simply drag in the Word or Excel file, pick the page to update, and click **Update** — done.
-
-
 
 ---
 
 
-
 ## 🧑‍💻 Author
-
-
 
 **Haakon Eidem Haakstad**  
 
 [GitHub](https://github.com/<your-username>)
 
-
-
 ---
-
-
 
 ## 🪪 License
 
-
-
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-
-
-```text
-
+```
 MIT License
 
 
@@ -365,18 +274,11 @@ Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 
 in the Software without restriction...
-
 ```
-
-
 
 ---
 
-
-
 ## 🙏 Acknowledgments
-
-
 
 - Built with **Qt for Python (PySide6)**.  
 
