@@ -128,7 +128,7 @@ chardet
 
 
 
-1\. **Clone or download** this repository:
+1. **Clone or download** this repository:
 
 ```bash
 
@@ -140,7 +140,7 @@ cd wordpress-uploader
 
 
 
-2\. **Create and activate a virtual environment (optional)**
+2. **Create and activate a virtual environment (optional)**
 
 ```bash
 
@@ -152,7 +152,7 @@ venv\\Scripts\\activate
 
 
 
-3\. **Install dependencies**
+3. **Install dependencies**
 
 ```bash
 
@@ -162,7 +162,7 @@ pip install -r requirements.txt
 
 
 
-4\. \\Run the application\\
+4. **Run the application**
 
 ```bash
 
@@ -192,13 +192,13 @@ Output will appear in `dist/main.exe`.
 
 
 
-1\. Log into your WordPress admin panel.  
+1. Log into your WordPress admin panel.  
 
-2\. Go to \\Users → Profile → Application Passwords\\.  
+2. Go to **Users → Profile → Application Passwords**.  
 
-3\. Create a new application password (give it a name like \Uploader\).  
+3. Create a new application password (give it a name like \Uploader\).  
 
-4\. In the app, enter:
+4. In the app, enter:
 
 - **Site URL** — e.g. `https://example.com`
 
@@ -206,9 +206,9 @@ Output will appear in `dist/main.exe`.
 
 - **Application Password**
 
-5\. Click **Log In** → the dropdown will populate with all editable pages.
+5. Click **Log In** → the dropdown will populate with all editable pages.
 
-6\. Drag your file into the window, check “I have selected the correct page,” and click **Update**.
+6. Drag your file into the window, check “I have selected the correct page,” and click **Update**.
 
 
 
@@ -289,12 +289,6 @@ wordpress-uploader/
 ├── main.py                # Main PySide6 application
 
 ├── requirements.txt       # Dependencies
-
-├── defaults.txt (opt.)    # Saved credentials (if enabled)
-
-├── temp\_backup.html       # Backup of last uploaded page
-
-├── \_tmp\_export/           # Temporary HTML conversion folder
 
 ├── README.md              # This file
 
