@@ -213,13 +213,10 @@ Drag & Drop → Office COM export → HTML Cleaning → Inline assets → Upload
 wordpress-uploader/
 
 │
-
+├── .gitignore             # Files and folders to be ignored by git.
 ├── main.py                # Main PySide6 application
-
 ├── requirements.txt       # Dependencies
-
 ├── README.md              # This file
-
 └── LICENSE                # MIT License
 
 ```
