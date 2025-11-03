@@ -50,6 +50,11 @@ A progress bar and status log show every step of the process — conversion, cle
 
 Runs on **Python 3.10–3.14** with **Windows + Microsoft Office** installed.
 
+✅ **New with v1.1.0: Edit Pages in Word or Excel**  
+Use the new **Edit** button to download an existing WordPress page and open it directly in Microsoft Word or Excel.  
+When you click **Edit**, you’ll be prompted to choose which program to use (Word or Excel).  
+After editing, the file is automatically **primed for re-upload**, ready to replace the original page with one click.
+
 ---
 
 ## 🧩 Requirements
@@ -180,19 +185,12 @@ If you need to revert, click **Undo / Regret**, and the app will re-upload the p
 ```
 
 | Component            | Purpose                                        |
-
 |----------------------|------------------------------------------------|
-
 | PySide6              | GUI framework (Qt for Python)                  |
-
 | pywin32              | Accesses Word/Excel via COM for conversion     |
-
 | BeautifulSoup + lxml | Cleans and normalizes exported HTML            |
-
 | requests             | Uploads content through the WordPress REST API |
-
 | chardet              | Auto-detects file encodings                    |
-
 | DPAPI (win32crypt)   | Optional encryption for stored credentials     |
 ```
 
@@ -227,11 +225,10 @@ wordpress-uploader/
 
 
 ```
-| Version | Date       | Highlights                                                                 |
-
-|---------|------------|----------------------------------------------------------------------------|
-
-| 1.0.0   | 2025-10-27 | Initial public release — full Word/Excel support, Undo/Regret, PySide6 GUI |
+| Version | Date       | Highlights                                                                   |
+|---------|------------|------------------------------------------------------------------------------|
+| 1.1.0   | 2025-11-03 | Added Edit functionality — download pages and open directly in word or excel | 
+| 1.0.0   | 2025-10-27 | Initial public release — full Word/Excel support, Undo/Regret, PySide6 GUI   |
 ```
 
 ---
@@ -269,5 +266,15 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 - Open-sourced to help others simplify the same workflow.
 
+## ⚠️ Known Issues
 
+Excel opening limitations: 
+
+When downloading a page and choosing to open it in Excel, formatting may not always be preserved perfectly. This happens because Excel interprets HTML differently than Word does. In some cases, table borders, merged cells, or text wrapping can appear altered.
+If this occurs, you can usually correct the layout manually in Excel before re-uploading.
+
+Excel SaveAs errors: Occasionally, Excel may show a "SaveAs method of Workbook class failed" error if the HTML is opened in read-only mode.
+Simply re-save the file manually inside Excel (File → Save As → .xlsx) and continue as normal.
+
+These are known limitations of Excel’s HTML import engine, not of the uploader itself.
 
