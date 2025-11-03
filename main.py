@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 
 # --- GUI (PySide6) ---
 from PySide6.QtCore import Qt, Signal, QObject, QThread, QFileInfo, QMetaObject
-from PySide6.QtGui import QDragEnterEvent, QDropEvent, QPalette
+from PySide6.QtGui import QDragEnterEvent, QDropEvent, QPalette, QIcon, QFontMetrics, QResizeEvent
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -74,6 +74,20 @@ def _pt_to_px(css_text: str, ratio: float = 1.3333) -> str:
 
     return re.sub(r"([\d.]+)\s*pt", repl, css_text)
 
+
+def _escape_non_ascii_as_entities(text: str) -> str:
+    """
+    Convert all non-ASCII characters to numeric HTML entities so Word
+    renders them correctly even if it guesses a legacy codepage.
+    """
+    out = []
+    for ch in text:
+        code = ord(ch)
+        if code < 128:
+            out.append(ch)
+        else:
+            out.append(f"&#{code};")
+    return "".join(out)
 
 # ------------------ Helpers: DPAPI encrypt/decrypt ------------------
 
@@ -624,69 +638,124 @@ class DropFrame(QFrame):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("dropFrame")
+
+        # ✅ Ensure stylesheet backgrounds are painted (important on some styles)
+        self.setAttribute(Qt.WA_StyledBackground, True)
+
         self.setFrameShape(QFrame.NoFrame)
         self.setAcceptDrops(True)
-        self.setMinimumHeight(180)
-        self.setCursor(Qt.PointingHandCursor)  # 👈 visual hint it’s clickable
+        self.setMinimumHeight(150)
+        self.setCursor(Qt.PointingHandCursor)
 
-        pal = self.palette()
-        pal.setColor(QPalette.Window, pal.color(QPalette.Base))
-        self.setPalette(pal)
-        self.setAutoFillBackground(True)
+        # Make sure the palette doesn’t fight the stylesheet
+        self.setAutoFillBackground(False)
 
-        # Optional: subtle “clickable”/hover styling
+        # ✅ Stronger, scoped stylesheet (so app/global styles don’t override it)
         self.setStyleSheet(
             "DropFrame { border: 2px dashed #999; padding: 10px; border-radius: 8px; background-color: transparent; }"
         )
 
-        # If you already added icons earlier, keep those; otherwise keep your original layout
         self.icon_provider = QFileIconProvider()
 
         lay = QVBoxLayout(self)
-        lay.setSpacing(2)
-        lay.setContentsMargins(8, 10, 8, 10)
+        lay.setSpacing(4)                    # less space between icon and label
+        lay.setContentsMargins(10, 10, 10, 10)
 
+        # Icon
         self.icon_label = QLabel()
-        self.icon_label.setFixedSize(96, 96)
+        self.icon_label.setFixedSize(64, 64)  # smaller than 96 to reduce gap
         self.icon_label.setAlignment(Qt.AlignHCenter | Qt.AlignBottom)
+        self.icon_label.setStyleSheet("background: transparent; border: none;")
 
-        self.label = QLabel(
-            "Drag & drop or click to choose a file (Excel/Word/HTML) to upload."
-        )
+        # Filename / hint
+        self.label = QLabel("Drag & drop or click to choose a file (Excel/Word/HTML) to upload.")
         self.label.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
-        self.label.setWordWrap(False)
-        self.label.setMinimumWidth(320)
-
-        # 🔹 Make it as small as its text allows vertically
+        self.label.setWordWrap(False)  # single line for clean elide
+        self.label.setMinimumWidth(280)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        self.label.setFixedHeight(
-            self.label.sizeHint().height() + 2
-        )  # +2 = tiny padding
-
-        # Optional: small margin tweak
-        self.label.setContentsMargins(0, 0, 0, 0)
+        self.label.setStyleSheet("background: transparent; border: none; font-size: 13px;")
+        self._base_hint = self.label.text()
 
         lay.addWidget(self.icon_label, alignment=Qt.AlignHCenter)
         lay.addWidget(self.label, alignment=Qt.AlignHCenter)
 
+        # cache current file / elide helper
+        self._current_path = None
+        self._fm = QFontMetrics(self.label.font())
+
         self._set_default_preview()
 
-    # --- existing helpers (unchanged) ---
-    def _set_default_preview(self):
-        generic_icon = QFileIconProvider().icon(QFileIconProvider.File)
-        self.icon_label.setPixmap(generic_icon.pixmap(96, 96))
-        self.label.setText(
-            "Drag & drop or click to choose a file (Excel/Word/HTML) to upload."
-        )
+    # ----------------- public helpers -----------------
+    def prime_file(self, path: str):
+        """
+        Programmatically select a file (used by 'Edit' flow).
+        Updates preview and emits fileDropped to keep app state in sync.
+        """
+        if not path:
+            return
+        p = Path(path)
+        if not p.exists():
+            return
+        self._set_file_preview_internal(p)
+        self.fileDropped.emit(str(p))
 
     def set_file_preview(self, path: str):
-        info = QFileInfo(path)
-        icon = QFileIconProvider().icon(info)
-        pm = icon.pixmap(96, 96)
-        self.icon_label.setPixmap(pm)
-        self.label.setText(info.fileName())
+        """Used by DnD / file dialog — updates only the UI preview."""
+        p = Path(path)
+        if p.exists():
+            self._set_file_preview_internal(p)
 
-    # --- NEW: click opens file dialog ---
+    def clear(self):
+        self._current_path = None
+        self._set_default_preview()
+        self.setProperty("hasFile", False)
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+
+    # ----------------- internals -----------------
+    def _set_default_preview(self):
+        generic_icon = self.icon_provider.icon(QFileIconProvider.File)
+        self.icon_label.setPixmap(generic_icon.pixmap(64, 64))
+        self._set_label_text_elided(self._base_hint)
+        self.setProperty("hasFile", False)
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+
+    
+    def _choose_icon_for(self, p: Path) -> QIcon:
+        # Use the system’s icon for this specific file
+        return self.icon_provider.icon(QFileInfo(str(p)))
+
+    def _set_file_preview_internal(self, p: Path):
+        self._current_path = p
+        icon = self._choose_icon_for(p)
+        self.icon_label.setPixmap(icon.pixmap(64, 64))
+        self._set_label_text_elided(p.name)
+        self.setToolTip(str(p))
+        self.setProperty("hasFile", True)
+        # refresh CSS “armed” look
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+
+    def _set_label_text_elided(self, text: str):
+        # elide according to current label width (with a small safety margin)
+        maxw = max(160, self.label.width() - 12)
+        elided = self._fm.elidedText(text, Qt.ElideRight, maxw)
+        self.label.setText(elided)
+
+    # Keep filename neatly elided when layout changes
+    def resizeEvent(self, event: QResizeEvent):
+        super().resizeEvent(event)
+        if self._current_path:
+            self._set_label_text_elided(Path(self._current_path).name)
+        else:
+            self._set_label_text_elided(self._base_hint)
+
+    # ----------------- click-to-browse -----------------
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             filters = (
@@ -696,16 +765,13 @@ class DropFrame(QFrame):
                 "HTML Files (*.htm *.html);;"
                 "All Files (*.*)"
             )
-            path, _ = QFileDialog.getOpenFileName(
-                self, "Choose a file", str(Path.home()), filters
-            )
+            path, _ = QFileDialog.getOpenFileName(self, "Choose a file", str(Path.home()), filters)
             if path:
-                self.set_file_preview(path)
+                self._set_file_preview_internal(Path(path))
                 self.fileDropped.emit(path)
-        # pass to base so selection/drag states still behave normally
         super().mousePressEvent(event)
 
-    # --- DnD stays the same ---
+    # ----------------- DnD -----------------
     def dragEnterEvent(self, e: QDragEnterEvent):
         if e.mimeData().hasUrls():
             for u in e.mimeData().urls():
@@ -718,16 +784,17 @@ class DropFrame(QFrame):
         paths = [Path(u.toLocalFile()) for u in e.mimeData().urls()]
         for p in paths:
             if p.suffix.lower() in ALLOWED_EXTS:
-                self.set_file_preview(str(p))  # keep preview in sync
+                self._set_file_preview_internal(p)  # keep preview in sync
                 self.fileDropped.emit(str(p))
                 break
+
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(APP_TITLE)
-        self.resize(560, 780)
+        self.resize(450, 700)
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -783,11 +850,6 @@ class MainWindow(QMainWindow):
         # spacing between sections
         v.addSpacing(20)
 
-        # --- Page chooser header ---
-        page_label = QLabel("<b>Select Page to Update:</b>")
-        page_label.setStyleSheet("font-weight: bold; font-size: 13px; margin-top: 2px;")
-        v.addWidget(page_label)
-
         # Page chooser + help button
         self.page_combo = QComboBox()
         self.page_combo.setEditable(False)
@@ -797,12 +859,54 @@ class MainWindow(QMainWindow):
             "Choose the WordPress page whose content will be replaced with the cleaned HTML."
         )
 
-        row_page = self._wrap_with_help(
-            self.page_combo,
-            "Select Page",
-            "Choose the WordPress page to update. The program will replace that page’s content "
-            "with the content in the selected Word/Excel/HTML file.",
+        # --- Page chooser header ---
+        page_label = QLabel("<b>Select Page to Update:</b>")
+        page_label.setStyleSheet("font-weight: bold; font-size: 13px; margin-top: 2px;")
+        v.addWidget(page_label)
+
+        # Page chooser + EDIT + help button
+        self.page_combo = QComboBox()
+        self.page_combo.setEditable(False)
+        self.page_combo.setInsertPolicy(QComboBox.NoInsert)
+        self.page_combo.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+        self.page_combo.setToolTip(
+            "Choose the WordPress page whose content will be replaced with the cleaned HTML."
         )
+
+        # New: Edit button (opens current page's HTML in Word)
+        self.btn_edit = QPushButton("Edit")
+        self.btn_edit.setToolTip("Download the current page HTML and open it in Word.")
+        self.btn_edit.setEnabled(False)  # enable once pages are loaded
+        self.btn_edit.setFixedWidth(70)  # make it narrower (adjust to taste)
+
+        # Small help button (reuse your pattern)
+        btn_help = QToolButton()
+        btn_help.setIcon(self.style().standardIcon(QStyle.SP_MessageBoxQuestion))
+        btn_help.setToolTip(
+            "Click 'Edit' to download the HTML of the selected page and open it in Word. "
+            "You can review or tweak it locally. (This does NOT change the website.)"
+        )
+        btn_help.setFixedSize(22, 22)
+        btn_help.setStyleSheet("QToolButton { border: none; padding: 0; } QToolButton:hover { color: #0078d7; }")
+        btn_help.clicked.connect(lambda: QMessageBox.information(
+            self, "Select Page / Edit", 
+            "Use the dropdown to pick a page. Click 'Edit' to download the current HTML "
+            "and open it in Word for inspection. This does not modify the website."
+        ))
+
+        # Layout with stretch for the dropdown to take most of the row
+        row_page = QHBoxLayout()
+        row_page.addWidget(self.page_combo, stretch=5)
+        row_page.addWidget(self.btn_edit, stretch=0)
+        row_page.addWidget(btn_help, stretch=0)
+        v.addLayout(row_page)
+
+        # Enable Edit once the dropdown has items
+        self.page_combo.currentIndexChanged.connect(
+            lambda _: self.btn_edit.setEnabled(self.page_combo.count() > 0 and self.page_combo.currentIndex() >= 0)
+        )
+        self.btn_edit.clicked.connect(self.on_edit_clicked)
+
 
         v.addLayout(row_page)
 
@@ -874,6 +978,336 @@ class MainWindow(QMainWindow):
         self.last_page_id = None
 
     # ---------- small helpers ----------
+
+    def _ask_open_target(self) -> str | None:
+        """
+        Ask the user whether to open in Word or Excel.
+        Returns 'word', 'excel', or None if cancelled.
+        """
+        box = QMessageBox(self)
+        box.setWindowTitle("Open in…")
+        box.setText("Open the downloaded page in:")
+        box.setIcon(QMessageBox.Question)
+
+        btn_word = box.addButton("Word", QMessageBox.AcceptRole)
+        btn_excel = box.addButton("Excel", QMessageBox.AcceptRole)
+        btn_cancel = box.addButton("Cancel", QMessageBox.RejectRole)
+
+        # Optional hints
+        box.setInformativeText("Choose Word for text-heavy pages; Excel for table/plan pages.")
+        box.exec()
+
+        clicked = box.clickedButton()
+        if clicked is btn_word:
+            return "word"
+        if clicked is btn_excel:
+            return "excel"
+        return None
+
+
+    def file_icon_for_ext(self, ext: str) -> QIcon:
+        ext = (ext or "").lower()
+        style = self.style()
+        # Try to use standard icons as fallback
+        if ext in (".doc", ".docx"):
+            return style.standardIcon(QStyle.SP_FileDialogDetailedView)  # looks like a doc
+        if ext in (".xls", ".xlsx"):
+            return style.standardIcon(QStyle.SP_DirIcon)  # you can swap to a custom Excel icon
+        if ext in (".htm", ".html"):
+            return style.standardIcon(QStyle.SP_FileIcon)
+        # default
+        return style.standardIcon(QStyle.SP_FileIcon)
+
+
+    def _prime_selected_file(self, path: Path) -> None:
+        """
+        Pretend a file was dropped: set current_file, update icon/label,
+        and refresh the Update button enabled-state and visuals.
+        """
+        try:
+            if not path or not Path(path).exists():
+                return
+
+            self.current_file = Path(path)
+
+            # icon
+            if hasattr(self, "drop_icon") and isinstance(self.drop_icon, QLabel):
+                try:
+                    icon = self.file_icon_for_ext(self.current_file.suffix)
+                    # Render at 48x48 for crispness
+                    self.drop_icon.setPixmap(icon.pixmap(48, 48))
+                except Exception:
+                    pass
+
+            # label
+            if hasattr(self, "drop_label") and isinstance(self.drop_label, QLabel):
+                self.drop_label.setText(self.current_file.name)
+                self.drop_label.setToolTip(str(self.current_file))
+                # Force relayout/refresh
+                self.drop_label.adjustSize()
+                self.drop_label.update()
+
+            # Visually “armed” state for the frame (optional)
+            if hasattr(self, "drop_frame") and isinstance(self.drop_frame, QFrame):
+                self.drop_frame.setProperty("hasFile", True)
+                # You can react to this property in CSS if you want different styling
+                self.drop_frame.style().unpolish(self.drop_frame)
+                self.drop_frame.style().polish(self.drop_frame)
+                self.drop_frame.update()
+
+            # Re-evaluate Update button enabled-state
+            ready = bool(self.current_file) and self.page_combo.count() > 0
+            if hasattr(self, "chk_confirm"):
+                ready = ready and bool(self.chk_confirm.checkState())
+            if hasattr(self, "btn_update"):
+                self.btn_update.setEnabled(bool(ready))
+
+            # Log
+            if hasattr(self, "log"):
+                self.log(f"Selected file for upload: {self.current_file}")
+
+        except Exception as e:
+            if hasattr(self, "log"):
+                self.log(f"Priming file failed: {e}")
+
+    def _open_page_in_excel_from_html(self, html_path: Path, page_id: int) -> Path:
+        """
+        Open the downloaded HTML in Excel, save as .xlsx, then open the .xlsx.
+        Falls back to opening the HTML with the default app if COM isn't available.
+        """
+        if not HAS_COM:
+            os.startfile(str(html_path))
+            return html_path
+
+        import pythoncom
+        pythoncom.CoInitialize()
+        xl = None
+        try:
+            # Excel constants
+            xlOpenXMLWorkbook = 51  # .xlsx
+
+            out_dir = html_path.parent
+            out_xlsx = out_dir / f"edit_page_{page_id}.xlsx"
+
+            xl = win32.gencache.EnsureDispatch("Excel.Application")
+            xl.Visible = True
+            xl.DisplayAlerts = False
+
+            # Excel can import HTML tables directly
+            wb = xl.Workbooks.Open(Filename=str(html_path))
+
+            # Overwrite if exists
+            if out_xlsx.exists():
+                try:
+                    out_xlsx.unlink()
+                except Exception:
+                    pass
+
+            wb.SaveAs(Filename=str(out_xlsx), FileFormat=xlOpenXMLWorkbook)
+            wb.Close(SaveChanges=False)
+
+            # Open the resulting .xlsx for the user
+            xl.Workbooks.Open(Filename=str(out_xlsx))
+            try:
+                xl.ActiveWindow.Activate()
+            except Exception:
+                pass
+
+            return out_xlsx
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except Exception:
+                pass
+
+
+    def _open_page_in_word_as_docx(self, html_path: Path, page_id: int) -> Path:
+        if not HAS_COM:
+            os.startfile(str(html_path))
+            return html_path
+
+        import pythoncom
+        pythoncom.CoInitialize()
+        try:
+            wdFormatXMLDocument = 12        # .docx
+            wdEncodingUTF8 = 65001          # force UTF-8
+            # (Optional) Other values if you ever need them:
+            # wdEncodingWestern = 1252
+
+            out_dir = html_path.parent
+            out_docx = out_dir / f"edit_page_{page_id}.docx"
+
+            word = win32.gencache.EnsureDispatch("Word.Application")
+            word.Visible = True
+            word.DisplayAlerts = 0  # wdAlertsNone
+
+            # ✅ Force UTF-8 on open
+            # NB: ConfirmConversions=True is required for 'Encoding' to take effect.
+            doc = word.Documents.Open(
+                str(html_path),
+                ConfirmConversions=True,
+                ReadOnly=False,
+                AddToRecentFiles=False,
+                # Encoding=wdEncodingUTF8,   # ← remove
+                # Format=None,               # ← remove; not needed
+            )
+
+            if out_docx.exists():
+                try:
+                    out_docx.unlink()
+                except Exception:
+                    pass
+
+            doc.SaveAs2(str(out_docx), FileFormat=wdFormatXMLDocument)
+            doc.Close(False)
+
+            # Open the resulting DOCX for the user
+            word.Documents.Open(str(out_docx))
+            try:
+                word.Activate()
+            except Exception:
+                pass
+
+            return out_docx
+        finally:
+            try:
+                pythoncom.CoUninitialize()
+            except Exception:
+                pass
+
+
+    def _fetch_page_html_for_edit(self, page_id: int) -> str:
+        """
+        Download the page content for local editing.
+        Prefer the 'raw' content (requires proper permissions); fall back to 'rendered'.
+        """
+        site = self.url.text().strip().rstrip("/")
+        user = self.username.text().strip()
+        app_pass = self.app_password.text().strip()
+
+        api_base = f"{site}/wp-json/wp/v2/pages"
+        get_url = f"{api_base}/{page_id}?context=edit"
+        try:
+            r = requests.get(get_url, auth=(user, app_pass), timeout=20)
+            if r.status_code in (401, 403):
+                # Fall back to rendered if raw not allowed
+                r = requests.get(f"{api_base}/{page_id}", auth=(user, app_pass), timeout=20)
+            r.raise_for_status()
+            data = r.json()
+            html = (data.get("content") or {}).get("raw") or (data.get("content") or {}).get("rendered") or ""
+            return html
+        except Exception as e:
+            raise RuntimeError(f"Failed to download page HTML: {e}")
+
+    def _open_html_in_word(self, html_path: Path):
+        """
+        Open the given HTML file in Microsoft Word if COM available;
+        otherwise fall back to the system default application.
+        """
+        try:
+            if HAS_COM:
+                import pythoncom
+                pythoncom.CoInitialize()
+                try:
+                    word = win32.gencache.EnsureDispatch("Word.Application")
+                    word.Visible = True
+                    word.Documents.Open(str(html_path))
+                finally:
+                    pythoncom.CoUninitialize()
+            else:
+                # Fallback: open with default program (usually a browser)
+                os.startfile(str(html_path))
+        except Exception as e:
+            raise RuntimeError(f"Could not open HTML in Word/default app: {e}")
+
+    def on_edit_clicked(self):
+        """
+        Handler for the 'Edit' button:
+        - Fetch current page HTML (raw if possible)
+        - Save to a temp .htm file (wrapped for Office)
+        - Ask user: open in Word or Excel
+        - Convert/open accordingly
+        - Prime the file in the drop area
+        """
+        if self.page_combo.count() == 0 or self.page_combo.currentIndex() < 0:
+            QMessageBox.warning(self, "Edit", "Please select a page first.")
+            return
+
+        try:
+            page_id = int(self.page_combo.currentData())
+        except Exception:
+            QMessageBox.warning(self, "Edit", "Could not read the selected page ID.")
+            return
+
+        page_title = self.page_combo.currentText() or f"ID {page_id}"
+
+        try:
+            if hasattr(self, "log"):
+                self.log(f"Downloading HTML for “{page_title}”…")
+
+            html = self._fetch_page_html_for_edit(page_id)
+            if not html.strip():
+                QMessageBox.warning(self, "Edit", "The page returned empty content.")
+                return
+
+            workdir = Path.cwd() / "_tmp_export"
+            workdir.mkdir(exist_ok=True)
+            html_path = workdir / f"edit_page_{page_id}.htm"
+
+            # Wrap in full HTML + UTF-8 meta; escape non-ASCII to avoid Word mis-decoding
+            wrapped_html = f"""<!DOCTYPE html>
+            <html>
+            <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+            <meta charset="utf-8">
+            <title>{page_title}</title>
+            </head>
+            <body>
+            {_escape_non_ascii_as_entities(html)}
+            </body>
+            </html>"""
+            with open(html_path, "w", encoding="utf-8-sig") as f:
+                f.write(wrapped_html)
+
+            if hasattr(self, "log"):
+                self.log(f"Saved HTML to: {html_path}")
+
+            # ✅ Ask user which app to use BEFORE logging anything else
+            target = self._ask_open_target()
+            if not target:
+                if hasattr(self, "log"):
+                    self.log("Edit cancelled by user.")
+                return
+
+            # ✅ Consistent, blue-colored progress message for both Word and Excel
+            if hasattr(self, "append_log_colored"):
+                if target == "excel":
+                    self.append_log_colored("Converting to XLSX and opening in Excel…", "blue")
+                else:
+                    self.append_log_colored("Converting to DOCX and opening in Word…", "blue")
+            elif hasattr(self, "log"):  # fallback if colored logging isn’t available
+                msg = (
+                    "Converting to XLSX and opening in Excel…"
+                    if target == "excel"
+                    else "Converting to DOCX and opening in Word…"
+                )
+                self.log(msg)
+
+            # --- Perform conversion ---
+            if target == "excel":
+                selected_path = self._open_page_in_excel_from_html(html_path, page_id)  # your existing version
+            else:
+                selected_path = self._open_page_in_word_as_docx(html_path, page_id)
+
+            # Prime the drop zone so it's ready for upload
+            self.drop.prime_file(str(selected_path))
+
+        except Exception as e:
+            if hasattr(self, "log"):
+                self.log(f"Edit failed: {e}")
+            QMessageBox.critical(self, "Edit Error", str(e))
+
+
 
     def _wrap_with_help(self, widget, help_title: str, help_text: str):
         """
@@ -975,6 +1409,11 @@ class MainWindow(QMainWindow):
             self.page_combo.addItem(title or f"(untitled {pid})", pid)
         self.log(f"Loaded {len(pages)} pages.")
         self.on_confirm_changed(self.chk_confirm.checkState())
+        # NEW: enable/disable Edit based on items
+        if hasattr(self, "btn_edit"):
+            self.btn_edit.setEnabled(self.page_combo.count() > 0)
+
+        
 
     def on_file_dropped(self, path_str: str):
         p = Path(path_str)
